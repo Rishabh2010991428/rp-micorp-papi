@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+       <flow name="rp-micorp-papi-main" doc:id="c687cf62-a8c8-4e5f-88ad-12c68e9119bf">
+        <http:listener config-ref="rp-micorp-papi-httpListenerConfig" path="/api/*" doc:name="Http request listener">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="rp-micorp-papi-config" />
+        <error-handler ref="global-error-handlerError_Handler" />
+    </flow>
+    <!-- [STUDIO:"rp-micorp-papi-console"]<flow name="rp-micorp-papi-console">
+        <http:listener config-ref="rp-micorp-papi-httpListenerConfig" path="/console/*" doc:name="http request listener">
+            <http:response statusCode="#[vars.httpStatus default 200&#93;">
+                <http:headers>#[vars.outboundHeaders default {}&#93;</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500&#93;">
+                <http:body>#[payload&#93;</http:body>
+                <http:headers>#[vars.outboundHeaders default {}&#93;</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="rp-micorp-papi-config" />
+		<error-handler ref="global-error-handlerError_Handler" />
+    </flow> [STUDIO] -->
+    <flow name="get:\healthCheck:rp-micorp-papi-config">
+        <flow-ref doc:name="healthCheckFlow" doc:id="684f850e-b288-41e0-a9cf-b1175c307443" name="health-checkSub_Flow" />
+        <error-handler ref="global-error-handlerError_Handler" />
+    </flow>
+    <flow name="post:\order:application\json:rp-micorp-papi-config" doc:id="65639a58-239c-422a-aafc-0c65e5ca2e25">
+        <flow-ref doc:name="createOrderFlow" doc:id="3c493eec-6d97-4e27-b3ad-1eb983db08a5" name="post-order" />
+        <error-handler ref="global-error-handlerError_Handler" />
+    </flow>
+</mule>

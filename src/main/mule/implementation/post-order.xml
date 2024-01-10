@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	
+	<sub-flow name="post-order" doc:id="87373258-9480-4f6d-b369-f51e837e3212" >
+		<json-logger:logger doc:name="Start Log" doc:id="0bd4b224-30b0-44d1-89aa-51f784dd603b" config-ref="JSON_Logger_Config" message="Orders flow has started"/>
+		<http:request method="GET" doc:name="GET :/ customer" doc:id="cfe6ade9-599a-4934-b6c6-6e408ec5f468" config-ref="HTTP_Request_configuration1" target="customerId" targetValue="#[payload.Name[0]]" path="/${request.getCustomer}" responseTimeout="300000000" sendBodyMode="AUTO">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : Mule::p('secure::request.client_secret'),
+	"client_id" : Mule::p('secure::request.client_id')
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	email : payload.customer.email
+}]]]></http:uri-params>
+		</http:request>
+		<choice doc:name="vars.customerId == null" doc:id="536f8c89-c97f-4bd7-afaa-e57808a1b14f" >
+			<when expression="#[vars.customerId == null]">
+				<json-logger:logger doc:name="No Customer" doc:id="3dea7735-7136-4ee6-8f00-124ecdc43af9" config-ref="JSON_Logger_Config" message="Customer do not exist"/>
+				<http:request method="POST" doc:name="POST :/ customer" doc:id="f966f7f0-ad25-4aa7-b197-06d2a2952554" config-ref="HTTP_Request_configuration1" path="/${request.postCustomer}" target="customerId" sendBodyMode="ALWAYS" responseTimeout="300000000" targetValue="#[payload.items[0].payload.id]">
+					<http:body ><![CDATA[#[payload.customer]]]></http:body>
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_id" : Mule::p('secure::request.client_id'),
+	"client_secret" : Mule::p('secure::request.client_secret')
+}]]]></http:headers>
+				</http:request>
+			</when>
+			<otherwise >
+				<json-logger:logger doc:name="Customer Exist" doc:id="5c0afc4c-5dc8-4435-ba53-7ff56432744b" config-ref="JSON_Logger_Config" message="Customer already exist"/>
+			</otherwise>
+		</choice>
+		<http:request method="POST" doc:name="POST :/ order" doc:id="3a858412-5c4e-44b0-9fab-3dac85d80021" config-ref="HTTP_Request_configuration1" target="orderId" path="/${request.postOrder}" responseTimeout="3000000" sendBodyMode="ALWAYS" targetValue="#[payload.items[0].id]">
+			<http:body ><![CDATA[#[output application/json --- payload.orderData mapObject ((value, key, index) -> ((key) : value)) ++ "customerId": vars.customerId]]]></http:body>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_id" : Mule::p('secure::request.client_id'),
+	"client_secret" : Mule::p('secure::request.client_secret')
+}]]]></http:headers>
+		</http:request>
+		<http:request method="POST" doc:name="POST :/ item" doc:id="a2eb29c6-c869-4c2d-ac2a-023335603631" config-ref="HTTP_Request_configuration1" path="/${request.postItem}" responseTimeout="30000000" sendBodyMode="AUTO">
+			<http:body ><![CDATA[#[output application/json --- payload.items map ((item, index) -> item mapObject ((value, key, index) -> {
+    (key): value
+}) ++ "orderId": vars.orderId)]]]></http:body>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : Mule::p('secure::request.client_secret'),
+	"client_id" : Mule::p('secure::request.client_id')
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="set response" doc:id="2da796e1-613d-41d6-9185-32856705c2c1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	status: 201,
+	message: "Order Placed"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="End Log" doc:id="b1b771a4-41ae-4eee-9466-a6ae4195a063" config-ref="JSON_Logger_Config" message="Flow has ended"/>
+	
+	</sub-flow>
+
+	
+	
+	
+	</mule>

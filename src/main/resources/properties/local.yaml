@@ -1,0 +1,18 @@
+http:
+  port: "8091"
+  host: "localhost"
+  basepath: "/micorp"
+
+#request config
+request:
+  host: "localhost"
+  port: "8081"
+  basePath: "micorp"
+  getCustomer: "customer/{email}"
+  postCustomer: "customer"
+  postOrder: "order"
+  postItem: "item"
+  
+#instance id
+api: 
+  id: "19211770"

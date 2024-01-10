@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<http:listener-config name="rp-micorp-papi-httpListenerConfig" basePath="${http.basepath}">
+        <http:listener-connection host="0.0.0.0" port="${http.port}" />
+    </http:listener-config>
+    <http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="c200aeb4-8c6c-4bfb-920e-a6634f41d4cd" basePath="/${request.basePath}">
+		<http:request-connection host="${request.host}" port="${request.port}" />
+	</http:request-config>
+    <apikit:config name="rp-micorp-papi-config" api="resource::ce235d46-115c-497c-b0e2-474afd80f5e9:rp-micorp-papi:1.0.4:raml:zip:rp-micorp-papi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+ 
+	<json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="ada4322d-cfc6-4f33-935b-66763a267372" environment="${mule.env}"/>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="156f0efa-ce21-435d-b8a0-e1b55af6a9e1" file="secure\secure-${mule.env}.yaml" key="${mule.encryption.key}" />
+	<configuration-properties doc:name="Configuration properties" doc:id="af7df1fb-a8e9-4610-82fd-d46914b7956d" file="properties\common.yaml" />
+	<api-gateway:autodiscovery apiId="${api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="52ed3e9d-efa5-4ebb-817e-888b165b9334" flowRef="rp-micorp-papi-main" />
+	<configuration-properties doc:name="Configuration properties" doc:id="6488f726-9ccb-4914-85cd-f4188e76d36c" file="properties\\${mule.env}.yaml" />
+</mule>

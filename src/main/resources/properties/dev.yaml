@@ -1,0 +1,20 @@
+#listener config
+http:
+  port: "8091"
+  host: ""
+  basepath: "/micorp"
+ 
+ 
+#request config
+request:
+  host: "rp-micorp-sapi.us-e1.cloudhub.io"
+  port: "80"
+  basePath: "micorp"
+  getCustomer: "customer/{email}"
+  postCustomer: "customer"
+  postOrder: "order"
+  postItem: "item"
+  
+#instance id
+api: 
+  id: "19211770"

@@ -1,0 +1,7 @@
+#json logger config
+json:
+  logger:
+    application:
+      name: "rp-micorp-papi-d"
+      version: "1.0.0"
+      
